@@ -27,5 +27,4 @@ class Sector:
             ball.handle_border_collision()
             for i in range(self.balls.index(ball) + 1, len(self.balls)):
                 ball.handle_collision(self.balls[i])
-                # ball.repulse(balls[i])
             ball.move()
