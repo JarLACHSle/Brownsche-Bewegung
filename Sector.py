@@ -1,5 +1,3 @@
-import Ball
-
 
 class Sector:
 

@@ -1,8 +1,8 @@
 import pygame
 import matplotlib.pyplot as plt
-import Ball
 import numpy as np
 
+import Ball
 import Sector
 
 pygame.init()
@@ -14,7 +14,7 @@ WIDTH, HEIGHT = 700, 400
 WIN = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Brownsche Bewegung")
 
-DO_VELOCITY_PLOT = False
+DO_VELOCITY_PLOT = True
 
 # Farbwerte
 RED = (255, 82, 32)
@@ -110,6 +110,14 @@ def main():
                 sector.append_ball(ball)
         for sector in sectors:
             sector.move_ball()
+            if DO_VELOCITY_PLOT:
+                '''falls True, wird die Geschwindigkeitsverteilung über den gesamten Verlauf der Simulation aufgezeichnet'''
+                for ball in sector.balls:
+                    abselv = np.linalg.norm(ball.vel_vec)
+                    if abselv in vel_dict:
+                        vel_dict[abselv] += 1
+                    else:
+                        vel_dict[abselv] = 1
 
         #for ball in balls:
         #    ''' Bewegung und Kollision aller Teilchen'''
@@ -118,21 +126,15 @@ def main():
         #        ball.handle_collision(balls[i])
         #        # ball.repulse(balls[i])
         #    ball.move()
-        #    if DO_VELOCITY_PLOT:
-        #        '''falls True, wird die Geschwindigkeitsverteilung über
-        #        den gesamten Verlauf der Simulation aufgezeichnet'''
-        #        abselv = math.sqrt(ball.x_vel ** 2 + ball.y_vel ** 2)
-        #        if abselv in vel_dict:
-        #            vel_dict[abselv] += 1
-        #       else:
-        #            vel_dict[abselv] = 1
+        
 
     if DO_VELOCITY_PLOT:
         '''falls True, wird nach Simulationsende die Geschwindigkeitsverteilung geplottet'''
-        for key in vel_dict:
-            plt.bar(key, vel_dict[key], 0.1, color="blue")
-            plt.show()
-
+        keys = list(vel_dict.keys())
+        values = list(vel_dict.values())
+        plt.bar(keys, values, 0.1, color="blue")
+        plt.show()
+        
     pygame.quit()
 
 
