@@ -10,6 +10,8 @@ class Ball:
         self.window_width = WIDTH
         self.window_height = HEIGHT
 
+        self.my_sector = None
+
         # Startwert und aktuelle Position
         self.x = self.original_x = random.randint(0 + radius, self.window_width - radius)
         self.y = self.original_y = random.randint(0 + radius, self.window_height - radius)
@@ -79,14 +81,3 @@ class Ball:
         abstand2 = np.linalg.norm(b2.position - self.position)
         if abstand2 > self.radius + b2.radius and count > 0:
             self.last_collision = None
-
-    # idee: problem ist dass die teilchen nicht weit genug zurückgehen und dann wieder in die andere richtung fliegen
-    # -> count einführen?
-    '''def repulse(self,b2):
-        ab_x = b2.x - self.x
-        ab_y = b2.y - self.y
-        distance = math.sqrt(ab_x ** 2 + ab_y ** 2)
-        if distance <= (self.radius + b2.radius):
-            repulse_force = -REPULSE/((distance**5)*self.masse)
-            self.x_vel += (ab_x/distance)*repulse_force
-            self.y_vel += (ab_y/distance)*repulse_force'''
