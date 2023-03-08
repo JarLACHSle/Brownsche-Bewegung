@@ -68,6 +68,10 @@ class Ball:
             # Zwischenspeicher für Geschwindigkeiten
             b1_vel_vec = self.vel_vec
             b2_vel_vec = b2.vel_vec
+            
+            #bewegt das Teilchen zurück, außerhalb des Radius des anderen Teilchens
+            backtrack = -1*(b2.radius+self.radius-abstand)*self.vel_vec/np.linalg.norm(self.vel_vec)
+            self.move_debug(backtrack)
 
             # Berechnung elastischer Stoß
             self.vel_vec = (self.masse * b1_vel_vec + b2.masse * (2 * b2_vel_vec - b1_vel_vec)) / (
