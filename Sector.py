@@ -17,6 +17,8 @@ class Sector:
             ball.my_sector = self
 
     def clear(self):
+        for ball in self.balls:
+            ball.my_sector = None
         self.balls = []
 
     def move_ball(self):

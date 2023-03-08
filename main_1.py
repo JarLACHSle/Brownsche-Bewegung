@@ -1,5 +1,3 @@
-import random
-import math
 import pygame
 import matplotlib.pyplot as plt
 import Ball
@@ -32,7 +30,7 @@ TIME_STEP = 3
 
 # Setup Teilchen
 BALL_RADIUS = 2
-BALL_AMOUNT = 250
+BALL_AMOUNT = 200
 BALL_COLOR = BLUE
 BALL_MASSE = 5
 
@@ -67,10 +65,10 @@ def generate_balls(amount):
 
 def generate_sectors(amount_sqr):
     sector_list = []
-    sector_1 = Sector.Sector(np.array([0, 0]), np.array([WIDTH/2, HEIGHT/2]))
-    sector_2 = Sector.Sector(np.array([WIDTH/2, 0]), np.array([WIDTH, HEIGHT/2]))
-    sector_3 = Sector.Sector(np.array([0, HEIGHT/2]), np.array([WIDTH/2, HEIGHT]))
-    sector_4 = Sector.Sector(np.array([WIDTH/2, HEIGHT/2]), np.array([WIDTH, HEIGHT]))
+    sector_1 = Sector.Sector(np.array([0-100, 0-100]), np.array([WIDTH/2, HEIGHT/2]))
+    sector_2 = Sector.Sector(np.array([WIDTH/2, 0-100]), np.array([WIDTH+100, HEIGHT/2]))
+    sector_3 = Sector.Sector(np.array([0-100, HEIGHT/2]), np.array([WIDTH/2, HEIGHT+100]))
+    sector_4 = Sector.Sector(np.array([WIDTH/2, HEIGHT/2]), np.array([WIDTH+100, HEIGHT+100]))
     sector_list.append(sector_1)
     sector_list.append(sector_2)
     sector_list.append(sector_3)
@@ -112,6 +110,7 @@ def main():
                 sector.append_ball(ball)
         for sector in sectors:
             sector.move_ball()
+
         #for ball in balls:
         #    ''' Bewegung und Kollision aller Teilchen'''
         #    ball.handle_border_collision()
