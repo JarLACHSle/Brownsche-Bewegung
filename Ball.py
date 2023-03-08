@@ -68,7 +68,6 @@ class Ball:
             # Zwischenspeicher für Geschwindigkeiten
             b1_vel_vec = self.vel_vec
             b2_vel_vec = b2.vel_vec
-            
 
             # Berechnung elastischer Stoß
             self.vel_vec = (self.masse * b1_vel_vec + b2.masse * (2 * b2_vel_vec - b1_vel_vec)) / (
