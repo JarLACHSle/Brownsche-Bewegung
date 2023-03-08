@@ -3,7 +3,6 @@ import math
 import pygame
 import matplotlib.pyplot as plt
 import numpy as np
-
 pygame.init()
 
 # v python 3d grafik
@@ -13,7 +12,7 @@ WIDTH, HEIGHT = 700, 400
 WIN = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Brownsche Bewegung")
 
-DO_VELOCITY_PLOT = False
+DO_VELOCITY_PLOT = True
 
 # Farbwerte
 RED = (255, 82, 32)
@@ -24,17 +23,16 @@ GREEN = (50, 205, 50)
 YELLOW = (255, 255, 0)
 
 # Tick-Faktor
-SPEEDING = 2
-# REPULSE = 0.1
+TIME_STEP = 3
 
 # Setup Teilchen
-BALL_RADIUS = 10
-BALL_AMOUNT = 20
+BALL_RADIUS = 2
+BALL_AMOUNT = 200
 BALL_COLOR = BLUE
 BALL_MASSE = 5
 
-BROWNSCHESTEILCHEN_MASSE = 10
-BROWNSCHESTEILCHEN_RADIUS = 10
+BROWNSCHESTEILCHEN_MASSE =  40
+BROWNSCHESTEILCHEN_RADIUS = 16
 BROWNSCHESTEILCHEN_COLOR = RED
 
 
@@ -46,7 +44,7 @@ class Ball:
         self.x = self.original_x = random.randint(0 + radius, WIDTH - radius)
         self.y = self.original_y = random.randint(0 + radius, HEIGHT - radius)
         self.position = np.array([self.x, self.y], dtype=float)
-        self.zeitschritt = SPEEDING
+        self.zeitschritt = TIME_STEP
 
         # zufälliger, normierter Start-Geschwindigkeitsvektor
         self.x_vel = random.uniform(-1, 1)
@@ -61,7 +59,7 @@ class Ball:
         self.masse = masse
         self.acceleration = np.array([0, 0])
         self.color = color
-        self.last_collision = None  # Teilchen mit dem self als letztes kollidert sind
+        self.last_collision = None  # Teilchen mit dem self als letztes kollidert ist
 
     def draw(self, win):
         '''zeichnet das Teilchen ins Fenster'''
@@ -97,7 +95,6 @@ class Ball:
 
     def handle_collision(self, b2):
         """überprüft Kollision mit anderen Teilchen und berechnet neue Geschwindigkeit"""
-        count = 0
         abstand = np.linalg.norm(b2.position - self.position)
         if abstand <= self.radius + b2.radius and not (self.last_collision == b2 and b2.last_collision == self):
             # Zwischenspeicher für Geschwindigkeiten
@@ -111,23 +108,35 @@ class Ball:
 
             self.last_collision = b2
             b2.last_collision = self
-            count += 1
-        abstand2 = np.linalg.norm(b2.position - self.position)
-        if abstand2 > self.radius + b2.radius and count > 0:
-            self.last_collision = None
-
-    # idee: problem ist dass die teilchen nicht weit genug zurückgehen und dann wieder in die andere richtung fliegen
-    # -> count einführen?
-    '''def repulse(self,b2):
-        ab_x = b2.x - self.x
-        ab_y = b2.y - self.y
-        distance = math.sqrt(ab_x ** 2 + ab_y ** 2)
-        if distance <= (self.radius + b2.radius):
-            repulse_force = -REPULSE/((distance**5)*self.masse)
-            self.x_vel += (ab_x/distance)*repulse_force
-            self.y_vel += (ab_y/distance)*repulse_force'''
-
-
+    
+class Sector:
+    '''Aufteilung von Teilchen in Listen(Sektoren), die je einem Abschnitt des Fensters zugeordnet sind'''
+    def __init__(self):
+        self.sec1 = []
+        self.sec2 = []
+        self.sec3 = []
+        self.sec4 = []
+    def sectorize(self,ball, height=HEIGHT, width=WIDTH):
+        '''ordnet den Ball einem Sektor im Koordinatensystem zu'''
+        if ball.position[0] >= width/2 and ball.position[1] >= height/2:
+            self.sec1.append(ball)
+            return(self.sec1)
+        elif ball.position[0] < width/2 and ball.position[1] >= height/2:
+            self.sec2.append(ball)
+            return(self.sec2)
+        elif ball.position[0] < width/2 and ball.position[1] < height/2:
+            self.sec3.append(ball)
+            return(self.sec3)
+        else:
+            self.sec4.append(ball)
+            return(self.sec4)
+    def flush(self):
+        '''leert die Sektoren'''
+        self.sec1 = []
+        self.sec2 = []
+        self.sec3 = []
+        self.sec4 = []
+    
 def draw(win, balls):
     '''animiert Teilchen'''
     win.fill(WHITE)
@@ -135,23 +144,22 @@ def draw(win, balls):
         ball.draw(win)
     pygame.display.update()
 
-
 def generate_balls(amount):
     '''initialisert eine Liste aller (nicht-brownschen) Teilchen'''
     balls = []
     for i in range(amount):
         ball = Ball(BALL_RADIUS, BALL_COLOR, BALL_MASSE)
         balls.append(ball)
-
     return balls
-
 
 def main():
     run = 1
     # generiert das brownsche Teilchen als ersten Eintrag einer Liste aller Teilchen
     brownsches_teilchen = Ball(BROWNSCHESTEILCHEN_RADIUS, BROWNSCHESTEILCHEN_COLOR, BROWNSCHESTEILCHEN_MASSE)
     balls = [brownsches_teilchen] + generate_balls(BALL_AMOUNT)
-    vel_dict = {}
+    # dictionary für die Auswertung der Geschwindigkeitsverteilung
+    vel_dict = {}  
+    sector = Sector()
 
     while run:
         draw(WIN, balls)
@@ -162,17 +170,18 @@ def main():
             if event.type == pygame.QUIT:
                 run = 0
                 break
+        sector.flush()
         for ball in balls:
+            own_sector = sector.sectorize(ball)
             ''' Bewegung und Kollision aller Teilchen'''
             ball.handle_border_collision()
-            for i in range(balls.index(ball) + 1, len(balls)):
-                ball.handle_collision(balls[i])
-                # ball.repulse(balls[i])
+            for i in range(len(own_sector)-1):
+                ball.handle_collision(own_sector[i])
             ball.move()
             if DO_VELOCITY_PLOT:
                 '''falls True, wird die Geschwindigkeitsverteilung über 
                 den gesamten Verlauf der Simulation aufgezeichnet'''
-                abselv = math.sqrt(ball.x_vel ** 2 + ball.y_vel ** 2)
+                abselv = math.sqrt(ball.vel_vec[0] ** 2 + ball.vel_vec[1] ** 2)
                 if abselv in vel_dict:
                     vel_dict[abselv] += 1
                 else:
@@ -180,9 +189,10 @@ def main():
 
     if DO_VELOCITY_PLOT:
         '''falls True, wird nach Simulationsende die Geschwindigkeitsverteilung geplottet'''
-        for key in vel_dict:
-            plt.bar(key, vel_dict[key], 0.1, color="blue")
-            plt.show()
+        keys = list(vel_dict.keys())
+        values = list(vel_dict.values())
+        plt.bar(keys, values, 0.1, color="blue")
+        plt.show()
 
     pygame.quit()
 
