@@ -31,7 +31,7 @@ class Ball:
         self.masse = masse
         self.acceleration = np.array([0, 0])
         self.color = color
-        self.last_collision = None  # Teilchen mit dem self als letztes kollidert sind
+        self.last_collision = None  # Teilchen mit dem self als letztes kollidiert ist
 
     def move(self):
         '''bewegt das Teilchen um die Geschwindigkeit'''
@@ -63,7 +63,6 @@ class Ball:
 
     def handle_collision(self, b2):
         """überprüft Kollision mit anderen Teilchen und berechnet neue Geschwindigkeit"""
-        count = 0
         abstand = np.linalg.norm(b2.position - self.position)
         if abstand <= self.radius + b2.radius and not (self.last_collision == b2 and b2.last_collision == self):
             # Zwischenspeicher für Geschwindigkeiten
@@ -77,7 +76,3 @@ class Ball:
 
             self.last_collision = b2
             b2.last_collision = self
-            count += 1
-        abstand2 = np.linalg.norm(b2.position - self.position)
-        if abstand2 > self.radius + b2.radius and count > 0:
-            self.last_collision = None
