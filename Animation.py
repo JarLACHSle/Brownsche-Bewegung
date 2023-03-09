@@ -6,6 +6,7 @@ import Ball
 import Sector
 import main_1
 from main_1 import do_everything
+from main_1 import balls
 
 def update_graph(num):
     global xlist,ylist,zlist
@@ -20,9 +21,11 @@ fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')
 title = ax.set_title('3D Test')
 
+xlist = [ball.position[0] for ball in balls]
+ylist = [ball.position[1] for ball in balls]
+zlist = [ball.position[2] for ball in balls]
 graph = ax.scatter(xlist, ylist, zlist)
 
-ani = matplotlib.animation.FuncAnimation(fig, update_graph, 100, 
-                               interval=500, blit=False)
+ani = matplotlib.animation.FuncAnimation(fig, update_graph, 100, interval=100, blit=False)
 
 plt.show()
