@@ -1,11 +1,8 @@
 import pygame
-import matplotlib.pyplot as plt
 import numpy as np
 
 import Ball
 import Sector
-
-pygame.init()
 
 # v python 3d grafik
 
@@ -37,21 +34,6 @@ BALL_MASSE = 5
 BROWNSCHESTEILCHEN_MASSE = 40
 BROWNSCHESTEILCHEN_RADIUS = 16
 BROWNSCHESTEILCHEN_COLOR = RED
-
-
-def draw_ball(win, ball):
-    '''zeichnet das Teilchen ins Fenster'''
-    pygame.draw.circle(win, ball.color, (ball.position[0], ball.position[1]), ball.radius)
-
-
-def draw(win, balls):
-    '''animiert Teilchen'''
-    win.fill(WHITE)
-    #draw_ball(win,balls[0])
-    for ball in balls:
-        draw_ball(win, ball)
-    pygame.display.update()
-
 
 def generate_balls(amount):
     '''initialisert eine Liste aller (nicht-brownschen) Teilchen'''
@@ -86,57 +68,18 @@ def generate_sectors(amount_sqr):
 
     return sector_list
 
-def main():
-    run = 1
-    # generiert das brownsche Teilchen als ersten Eintrag einer Liste aller Teilchen
-    brownsches_teilchen = Ball.Ball(BROWNSCHESTEILCHEN_RADIUS, BROWNSCHESTEILCHEN_COLOR, BROWNSCHESTEILCHEN_MASSE, WIDTH, HEIGHT, TIME_STEP)
-    balls = [brownsches_teilchen] + generate_balls(BALL_AMOUNT)
-    sectors = generate_sectors(2)
-    vel_dict = {}
+brownsches_teilchen = Ball.Ball(BROWNSCHESTEILCHEN_RADIUS, BROWNSCHESTEILCHEN_COLOR, BROWNSCHESTEILCHEN_MASSE, WIDTH, HEIGHT, TIME_STEP)
+balls = [brownsches_teilchen] + generate_balls(BALL_AMOUNT)
+sectors = generate_sectors(2)
+vel_dict = {}
 
-    while run:
-        draw(WIN, balls)
-        pygame.time.Clock().tick(60)
+def do_everything():
+    for sector in sectors:
+        sector.clear()
+        for ball in balls:
+            sector.append_ball(ball)
+    for sector in sectors:
+        sector.move_ball()
+    return balls
+    
 
-        # prüft, ob das Fenster geschlosen wurde und beendet das Programm
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                run = 0
-                break
-
-        for sector in sectors:
-            sector.clear()
-            for ball in balls:
-                sector.append_ball(ball)
-        for sector in sectors:
-            sector.move_ball()
-            if DO_VELOCITY_PLOT:
-                '''falls True, wird die Geschwindigkeitsverteilung über den gesamten Verlauf der Simulation aufgezeichnet'''
-                for ball in sector.balls:
-                    abselv = np.linalg.norm(ball.vel_vec)
-                    if abselv in vel_dict:
-                        vel_dict[abselv] += 1
-                    else:
-                        vel_dict[abselv] = 1
-
-        #for ball in balls:
-        #    ''' Bewegung und Kollision aller Teilchen'''
-        #    ball.handle_border_collision()
-        #    for i in range(balls.index(ball) + 1, len(balls)):
-        #        ball.handle_collision(balls[i])
-        #        # ball.repulse(balls[i])
-        #    ball.move()
-        
-
-    if DO_VELOCITY_PLOT:
-        '''falls True, wird nach Simulationsende die Geschwindigkeitsverteilung geplottet'''
-        keys = list(vel_dict.keys())
-        values = list(vel_dict.values())
-        plt.bar(keys, values, 0.1, color="blue")
-        plt.show()
-        
-    pygame.quit()
-
-
-if __name__ == '__main__':
-    main()
