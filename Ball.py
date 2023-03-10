@@ -84,5 +84,6 @@ class Ball:
 
             self.last_collision = b2
             b2.last_collision = self
-            if b2.color == "red":
-                print("Stoß mit brownschem Teilchen!")
+            
+            #Debug
+            #print("Stoß!, Farben ={}".format(self.color+b2.color))

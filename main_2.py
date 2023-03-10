@@ -81,3 +81,4 @@ graph = ax.scatter(xlist, ylist, zlist, s= sizes, c=colors)
 ani = matplotlib.animation.FuncAnimation(fig, update_graph, 16, interval=50, blit=False)
 
 plt.show()  
+
