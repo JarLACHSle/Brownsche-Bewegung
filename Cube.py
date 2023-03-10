@@ -1,18 +1,14 @@
 class Cubesector:
     def __init__(self, center, length):
-        '''
-        Initializes a 3D cube with a given center and length.
-        :param center: A tuple containing the (x, y, z) coordinates of the center of the cube.
-        :param length: The length of each side of the cube.
-        '''
+
         self.center = center
         self.length = length
         self.balls = []
 
     def subdivide(self):
-        """
+        '''
         Teilt den Würfel in 8 neue, gleich große Würfel auf und sammelt diese in einer Liste
-        """
+        '''
         x, y, z = self.center
         l = self.length / 2
         subcubes_list = [
