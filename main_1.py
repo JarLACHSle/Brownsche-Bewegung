@@ -7,21 +7,23 @@ import Ball
 import Cube
 
 # Setup Fenster 
-WIDTH = HEIGHT = DEPTH = 200
+WIDTH = HEIGHT = DEPTH = 100 # in z.B. [m]*10^-4 -> gesamt 1 cm
 
 # Tick-Faktor
 TIME_STEP = 1
-num_steps = 10000
+num_steps = 1000
 
 # Setup Teilchen
-BALL_RADIUS = 2
-BALL_AMOUNT = 100
+BALL_RADIUS = 2 # 0.2mm
+BALL_AMOUNT = 200
 BALL_COLOR = "blue"
-BALL_MASSE = 5
+BALL_MASSE = 0.5 # 0.05g
 
-BROWNSCHESTEILCHEN_MASSE = 40
-BROWNSCHESTEILCHEN_RADIUS = 16
+BROWNSCHESTEILCHEN_MASSE = 4 # 0.4 g 
+BROWNSCHESTEILCHEN_RADIUS = 16 # 4mm
 BROWNSCHESTEILCHEN_COLOR = "red"
+
+GRAVITATION = 0.098
 
 def generate_balls(amount):
     '''initialisert eine Liste aller (nicht-brownschen) Teilchen'''
@@ -41,7 +43,7 @@ def do_everything():
             index = Mothercube.get_subcube(ball)
             own_subcube = subcubes_list[index]
             own_subcube.balls.append(ball)
-        subcube.move_ball()
+        subcube.move_ball(G=GRAVITATION)
     return balls
 
 def update_graph(num):
@@ -78,7 +80,6 @@ ylist = [ball.position[1] for ball in balls]
 zlist = [ball.position[2] for ball in balls]
 brown_pos = np.empty((num_steps,3))
 count = 0
-
 
 # ordnet den Scatter-Punkten die richtigen Farben und Radien zu
 sizes = np.ones(BALL_AMOUNT+1)*BALL_RADIUS**2

@@ -36,7 +36,7 @@ class Ball:
 
     def move(self):
         '''bewegt das Teilchen um die Geschwindigkeit'''
-        self.position += self.vel_vec * self.zeitschritt
+        self.position += self.vel_vec* self.zeitschritt
 
     def move_debug(self, moving):
         '''bewegt das Teilchen um einen festen Wert'''

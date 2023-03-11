@@ -45,10 +45,11 @@ class Cubesector:
             ball.my_sector = None
         self.balls = []
     
-    def move_ball(self):
+    def move_ball(self,G):
         ''' Bewegung und Kollision aller Teilchen'''
         for ball in self.balls:
             ball.handle_border_collision()
             for i in range(self.balls.index(ball) + 1, len(self.balls)):
                 ball.handle_collision(self.balls[i])
+            ball.vel_vec[2] -= ball.masse*G*ball.zeitschritt
             ball.move()
