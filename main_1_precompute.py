@@ -11,7 +11,7 @@ WIDTH = HEIGHT = DEPTH = 100 # in z.B. [m]*10^-4 -> gesamt 1 cm
 
 # Tick-Faktor
 TIME_STEP = 1
-num_steps = 1000
+num_steps = 100
 
 # Setup Teilchen
 BALL_RADIUS = 2 # 0.2mm
@@ -49,12 +49,9 @@ def do_everything():
 def update_graph(num):
     '''zeichnet die Verschiebung der Position ins Koordinatensystem'''
     global xlist,ylist,zlist,brown_pos,count
-    count += 1
-    xlist = [ball.position[0] for ball in do_everything()]
-    ylist = [ball.position[1] for ball in do_everything()]
-    zlist = [ball.position[2] for ball in do_everything()]
-    brown_pos[count-1] = brownsches_teilchen.position
-    #brown_pos = np.append(brown_pos, brownsches_teilchen.position, axis = 0)
+    xlist = [computed_positions[num,index,0] for index in range(BALL_AMOUNT+1)]
+    ylist = [computed_positions[num,index,1] for index in range(BALL_AMOUNT+1)]
+    zlist = [computed_positions[num,index,2] for index in range(BALL_AMOUNT+1)]
     graph._offsets3d = (xlist, ylist, zlist)
     line.set_data(brown_pos[:num, :2].T)
     line.set_3d_properties(brown_pos[:num, 2])
@@ -67,6 +64,23 @@ balls = [brownsches_teilchen] + generate_balls(BALL_AMOUNT)
 Mothercube = Cube.Cubesector((WIDTH/2,HEIGHT/2,DEPTH/2), WIDTH/2)
 subcubes_list = Mothercube.subdivide()
 
+'''erstellt ein dreidimensionales Array [num_steps*(BALL_AMOUNT+1)*3] (+1 wegen des brownschen Teilchens)
+  und berechnet alle Positionen der Teilchen vor, indem wiederholt do_everything aufgerufen wird'''                            
+computed_positions = np.empty((num_steps, BALL_AMOUNT+1,3))
+brown_pos = np.empty((num_steps,3))
+print("Starte Berechnung. Anzahl Bälle = {}, Anzahl Schritte = {}".format(BALL_AMOUNT,num_steps))
+
+for i1 in range(num_steps):
+    for i2,ball in enumerate(do_everything()):
+        computed_positions[i1,i2,0] = ball.position[0]
+        computed_positions[i1,i2,1] = ball.position[1]
+        computed_positions[i1,i2,2] = ball.position[2]
+    if i1%(num_steps/10) == 0:
+        print("{}% abgeschlossen".format((i1/num_steps)*100))
+    brown_pos[i1,0] = brownsches_teilchen.position[0]
+    brown_pos[i1,1] = brownsches_teilchen.position[1]
+    brown_pos[i1,2] = brownsches_teilchen.position[2]
+    
 #initialisiert das Fenster
 fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')
@@ -74,12 +88,10 @@ ax.grid(False)
 # Für XY stattdessen : ax = fig.add_subplot(111)
 title = ax.set_title('Brownsche Bewegung')
 
-# Positionen für den Start-Plot
+#Anfangswerte für die Positionen, damit später ._offset3d genutzt werden kann
 xlist = [ball.position[0] for ball in balls]
 ylist = [ball.position[1] for ball in balls]
 zlist = [ball.position[2] for ball in balls]
-brown_pos = np.empty((num_steps,3))
-count = 0
 
 # ordnet den Scatter-Punkten die richtigen Farben und Radien zu
 sizes = np.ones(BALL_AMOUNT+1)*BALL_RADIUS**2
@@ -94,5 +106,9 @@ line, = ax.plot([],[],[], c="green")
 
 # Animiert die berechneten Veränderungen
 ani = matplotlib.animation.FuncAnimation(fig, update_graph, num_steps, interval=50, blit=False)
+
+#speichert die Animation als Video
+ani.save('Brownsche_Bewegung_Render.mp4', fps=30, )
+print("saved!")
 
 plt.show()  

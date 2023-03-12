@@ -51,5 +51,5 @@ class Cubesector:
             ball.handle_border_collision()
             for i in range(self.balls.index(ball) + 1, len(self.balls)):
                 ball.handle_collision(self.balls[i])
-            ball.vel_vec[2] -= ball.masse*G*ball.zeitschritt
+            ball.vel_vec[2] -= G*ball.zeitschritt
             ball.move()
