@@ -1,31 +1,29 @@
 import random
 import math
 import numpy as np
+import vpython
 
 
-class Ball:
+class Ball(vpython.sphere):
     '''Klasse für alle stoßenden Teilchen'''
 
-    def __init__(self, radius, color, masse, WIDTH, HEIGHT, zeitschritt):
-        self.window_width = WIDTH
-        self.window_height = HEIGHT
+    def __init__(self, radius, color, masse, length, width, height, zeitschritt, **args):
+        super().__init__(**args)
 
-        self.my_sector = None
+        self.window_length = length
+        self.window_width = width
+        self.window_height = height
 
         # Startwert und aktuelle Position
-        self.x = self.original_x = random.randint(0 + radius, self.window_width - radius)
-        self.y = self.original_y = random.randint(0 + radius, self.window_height - radius)
-        self.position = np.array([self.x, self.y], dtype=float)
+        self.x = self.original_x = random.uniform(-self.window_length/2 + radius, self.window_length/2 - radius)
+        self.y = self.original_y = random.uniform(-self.window_width/2 + radius, self.window_width/2 - radius)
+        self.z = self.original_z = random.uniform(-self.window_width/2 + radius, self.window_height/2 - radius)
+        self.pos = vpython.vector(self.x, self.y, self.z)
         self.zeitschritt = zeitschritt
 
         # zufälliger, normierter Start-Geschwindigkeitsvektor
-        self.x_vel = random.uniform(-1, 1)
-        self.y_vel = random.uniform(-1, 1)
-        norm = math.sqrt(self.x_vel ** 2 + self.y_vel ** 2)
-        self.x_vel = self.x_vel / norm
-        self.y_vel = self.y_vel / norm
-        self.vel_vec = np.array([self.x_vel, self.y_vel])
-
+        self.vel_vec = vpython.norm(vpython.vector.random())
+        #self.vel_vec = vpython.vector(1, 0, 0)
         self.radius = radius
 
         self.masse = masse
@@ -35,35 +33,43 @@ class Ball:
 
     def move(self):
         '''bewegt das Teilchen um die Geschwindigkeit'''
-        self.position += self.vel_vec * self.zeitschritt
+        self.pos += self.vel_vec * self.zeitschritt
 
     def move_debug(self, moving):
         '''bewegt das Teilche um einen festen Wert'''
-        self.position += moving
+        self.pos += moving
 
     def handle_border_collision(self):
         '''überprüft Kollision mit der Wand, invertiert Geschwindigkeitskomponente
         und setzt das Teilchen zurück ins Fenster'''
-        if self.position[1] + self.radius >= self.window_height:
-            self.vel_vec[1] *= -1
-            self.move_debug(np.array([0, -((self.position[1] + self.radius) - self.window_height)]))
+        if self.pos.value[2] + self.radius > self.window_width/2:
+            self.vel_vec = vpython.vector(self.vel_vec.value[0], self.vel_vec.value[1], self.vel_vec.value[2] * -1)
+            self.move_debug(vpython.vector(0, 0, -(self.pos.value[2] + self.radius - self.window_width/2)))
             self.last_collision = None
-        elif self.position[1] - self.radius <= 0:
-            self.vel_vec[1] *= -1
-            self.move_debug(np.array([0, - self.position[1] + self.radius]))
+        elif self.pos.value[2] - self.radius < -self.window_width/2:
+            self.vel_vec = vpython.vector(self.vel_vec.value[0], self.vel_vec.value[1], self.vel_vec.value[2] * -1)
+            self.move_debug(vpython.vector(0, 0, -(self.pos.value[2] - self.radius) - self.window_width/2))
             self.last_collision = None
-        if self.position[0] + self.radius >= self.window_width:
-            self.vel_vec[0] *= -1
-            self.move_debug(np.array([-((self.position[0] + self.radius) - self.window_width), 0]))
+        if self.pos.value[1] + self.radius > self.window_height/2:
+            self.vel_vec = vpython.vector(self.vel_vec.value[0], self.vel_vec.value[1] * -1, self.vel_vec.value[2])
+            self.move_debug(vpython.vector(0, -(self.pos.value[1] + self.radius - self.window_height/2), 0))
             self.last_collision = None
-        elif self.position[0] - self.radius <= 0:
-            self.vel_vec[0] *= -1
-            self.move_debug(np.array([-self.position[0] + self.radius, 0]))
+        elif self.pos.value[1] - self.radius < -self.window_height/2:
+            self.vel_vec = vpython.vector(self.vel_vec.value[0], self.vel_vec.value[1] * -1, self.vel_vec.value[2])
+            self.move_debug(vpython.vector(0, -(self.pos.value[1] - self.radius)-self.window_height/2, 0))
+            self.last_collision = None
+        if self.pos.value[0] + self.radius > self.window_length/2:
+            self.vel_vec = vpython.vector(self.vel_vec.value[0] * -1, self.vel_vec.value[1], self.vel_vec.value[2])
+            self.move_debug(vpython.vector(-(self.pos.value[0] + self.radius - self.window_length/2), 0, 0))
+            self.last_collision = None
+        elif self.pos.value[0] - self.radius < -self.window_length/2:
+            self.vel_vec = vpython.vector(self.vel_vec.value[0] * -1, self.vel_vec.value[1], self.vel_vec.value[2])
+            self.move_debug(vpython.vector(-(self.pos.value[0] - self.radius)-self.window_length/2, 0, 0))
             self.last_collision = None
 
     def handle_collision(self, b2):
         """überprüft Kollision mit anderen Teilchen und berechnet neue Geschwindigkeit"""
-        abstand = np.linalg.norm(b2.position - self.position)
+        abstand = vpython.mag(b2.pos - self.pos)
         if abstand <= self.radius + b2.radius and not (self.last_collision == b2 and b2.last_collision == self):
             # Zwischenspeicher für Geschwindigkeiten
             b1_vel_vec = self.vel_vec
