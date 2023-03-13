@@ -1,3 +1,7 @@
+import Ball
+GREEN = (50, 205, 50)
+wall=Ball.Ball(1,GREEN,2,700,400,300,3)
+
 class Cubesector:
     def __init__(self, center, length):
 
@@ -48,8 +52,8 @@ class Cubesector:
     def move_ball(self,G):
         ''' Bewegung und Kollision aller Teilchen'''
         for ball in self.balls:
-            ball.handle_border_collision()
+            ball.handle_border_collision(wall)
             for i in range(self.balls.index(ball) + 1, len(self.balls)):
-                ball.handle_collision(self.balls[i])
+                ball.handle_collision(self.balls[i],wall)
             ball.vel_vec[2] -= G*ball.zeitschritt
             ball.move()
