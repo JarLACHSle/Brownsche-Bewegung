@@ -40,29 +40,26 @@ def generate_balls(amount):
 
     return balls
 
-
 def do_everything():
     '''ruft alle wichtigen Kollisionsfunktionen an der richtigen Stelle auf'''
-    global vanishes
     for subcube in subcubes_list:
         subcube.clear()
         for ball in balls:
             index = Mothercube.get_subcube(ball)
             own_subcube = subcubes_list[index]
             own_subcube.balls.append(ball)
-        subcube.move_ball(G=GRAVITATION)
-        if brownsches_teilchen.position[2]+BROWNSCHESTEILCHEN_RADIUS < bot_layer or brownsches_teilchen.position[2]-BROWNSCHESTEILCHEN_RADIUS > top_layer:
-            vanishes +=1
-            
+        subcube.move_ball(G=GRAVITATION)           
     return balls
 
 def update_graph(num):
     '''zeichnet die Verschiebung der Position ins Koordinatensystem'''
-    global xlist,ylist,zlist,brown_pos,count
+    global xlist,ylist,zlist,brown_pos,count,vanishes
     count += 1
     xlist = [ball.position[0] for ball in do_everything()]
     ylist = [ball.position[1] for ball in do_everything()]
     zlist = [ball.position[2] for ball in do_everything()]
+    if brownsches_teilchen.position[2]+BROWNSCHESTEILCHEN_RADIUS < bot_layer or brownsches_teilchen.position[2]-BROWNSCHESTEILCHEN_RADIUS > top_layer:
+        vanishes +=1
     brown_pos[count-1] = brownsches_teilchen.position
     #brown_pos = np.append(brown_pos, brownsches_teilchen.position, axis = 0)
     #graph._offsets3d = (xlist, ylist, zlist)
