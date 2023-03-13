@@ -42,25 +42,25 @@ class Ball:
         '''bewegt das Teilchen um einen festen Wert'''
         self.position += moving
 
-    def handle_border_collision(self):
+    def handle_border_collision(self,wall):
         '''überprüft Kollision mit der Wand, invertiert Geschwindigkeitskomponente
         und setzt das Teilchen zurück ins Fenster'''
         if self.position[2] + self.radius >= self.window_depth:
             self.vel_vec[2] *= -1
             self.move_debug(np.array([0, 0, -((self.position[2] + self.radius) - self.window_depth)]))
-            self.last_collision = None
+            self.last_collision = wall
         elif self.position[2] - self.radius <= 0:
             self.vel_vec[2] *= -1
             self.move_debug(np.array([0, 0, - self.position[2] + self.radius]))
-            self.last_collision = None
+            self.last_collision = wall
         if self.position[1] + self.radius >= self.window_height:
             self.vel_vec[1] *= -1
             self.move_debug(np.array([0, -(self.position[1] + self.radius - self.window_height), 0]))
-            self.last_collision = None
+            self.last_collision = wall
         elif self.position[1] - self.radius <= 0:
             self.vel_vec[1] *= -1
             self.move_debug(np.array([0, - self.position[1] + self.radius, 0]))
-            self.last_collision = None
+            self.last_collision = wall
         if self.position[0] + self.radius >= self.window_width:
             self.vel_vec[0] *= -1
             self.move_debug(np.array([-(self.position[0] + self.radius - self.window_width), 0, 0]))
@@ -68,12 +68,12 @@ class Ball:
         elif self.position[0] - self.radius <= 0:
             self.vel_vec[0] *= -1
             self.move_debug(np.array([-self.position[0] + self.radius, 0, 0]))
-            self.last_collision = None
+            self.last_collision = wall
 
-    def handle_collision(self, b2):
+    def handle_collision(self, b2,wall):
         """überprüft Kollision mit anderen Teilchen und berechnet neue Geschwindigkeit"""
         abstand = np.linalg.norm(b2.position - self.position)
-        if abstand <= self.radius + b2.radius and not (self.last_collision == b2 and b2.last_collision == self):
+        if abstand <= self.radius + b2.radius and (self.last_collision != b2 or b2.last_collision != self or   		  self.last_collision==wall or b2.last_collision==wall):
             # Zwischenspeicher für Geschwindigkeiten
             b1_vel_vec = self.vel_vec
             b2_vel_vec = b2.vel_vec
