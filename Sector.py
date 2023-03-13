@@ -12,7 +12,6 @@ class Sector:
 
         if True in ball_is_in_right and not False in ball_is_in_right and True in ball_is_in_left and not False in ball_is_in_left:
             self.balls.append(ball)
-            ball.my_sector = self
 
     def clear(self):
         for ball in self.balls:
