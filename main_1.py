@@ -1,44 +1,32 @@
-import pygame
 import matplotlib.pyplot as plt
 import numpy as np
 from vpython import *
-
 import Ball
 import Sector
-
-
-# v python 3d grafik
-
 
 
 # Setup Fenster
 #(lenght : x; height: y; width: z)
 LENGHT, HEIGHT, WIDTH = 20, 20, 20
-wall_bottom = box(pos=vector(0, -HEIGHT/2, 0),     color=color.white,  length=LENGHT, height=.1,     width=WIDTH)
-wall_back = box(pos=vector(0, 0, -WIDTH/2),       color=color.white,    length=LENGHT, height=HEIGHT, width=.1)
-wall_left = box(pos=vector(-LENGHT/2, 0, 0),       color=color.white,   length=.1,     height=HEIGHT, width=WIDTH)
-wall_right = box(pos=vector(LENGHT/2, 0, 0),        color=color.white,   length=.1,     height=HEIGHT, width=WIDTH)
-wall_top = box(pos=vector(0, HEIGHT/2, 0),         color=color.white,  length=LENGHT, height=.1,     width=WIDTH)
+wall_bottom = box(pos=vector(0, -HEIGHT/2, 0), color=color.white, size=vector(LENGHT, .1, WIDTH))
+wall_back = box(pos=vector(0, 0, -WIDTH/2), color=color.white, size=vector(LENGHT, HEIGHT, .1))
+wall_left = box(pos=vector(-LENGHT/2, 0, 0), color=color.white, size=vector(.1, HEIGHT, WIDTH))
+wall_right = box(pos=vector(LENGHT/2, 0, 0), color=color.white, size=vector(.1, HEIGHT, WIDTH))
+wall_top = box(pos=vector(0, HEIGHT/2, 0), color=color.white, size=vector(LENGHT, .1, WIDTH))
+#wall_front = box(pos=vector(0, 0, WIDTH/2), color=color.white, size=vector(LENGHT, HEIGHT, .1))
 
 DO_VELOCITY_PLOT = True
 
-# Farbwerte
-RED = vector(255, 82, 32)
-BLACK = vector(0, 0, 0)
-BLUE = vector(23, 2, 255)
-WHITE = vector(255, 255, 255)
-GREEN = vector(50, 205, 50)
-YELLOW = vector(255, 255, 0)
-
 # Tick-Faktor
-TIME_STEP = 0.5
+TIME_STEP = .005
 # REPULSE = 0.1
 
 # Setup Teilchen
-BALL_RADIUS = .1
-BALL_AMOUNT = 400
+BALL_RADIUS = .05
+BALL_AMOUNT = 100
 BALL_COLOR = color.black
-BALL_MASSE = 5
+BALL_MASSE = 1
+
 
 BROWNSCHESTEILCHEN_MASSE = 40
 BROWNSCHESTEILCHEN_RADIUS = 2
@@ -88,7 +76,7 @@ def generate_sectors(amount_sqr):
     return sector_list
 
 def main():
-    run = 1
+    run = True
     # generiert das brownsche Teilchen als ersten Eintrag einer Liste aller Teilchen
     brownsches_teilchen = Ball.Ball(BROWNSCHESTEILCHEN_RADIUS, BROWNSCHESTEILCHEN_COLOR, BROWNSCHESTEILCHEN_MASSE, LENGHT, WIDTH, HEIGHT, TIME_STEP)
     balls = [brownsches_teilchen] + generate_balls(BALL_AMOUNT)
@@ -96,12 +84,31 @@ def main():
     vel_dict = {}
 
     while run:
+        rate(60)
+        k = keysdown()
+        if 'left' in k:
+            run = False
+
         for ball in balls:
             ''' Bewegung und Kollision aller Teilchen'''
             ball.handle_border_collision()
             for i in range(balls.index(ball) + 1, len(balls)):
                 ball.handle_collision(balls[i])
             ball.move()
+
+
+        if DO_VELOCITY_PLOT:
+            '''falls True, wird die Geschwindigkeitsverteilung über den gesamten Verlauf der Simulation aufgezeichnet'''
+            for ball in balls:
+                abselv = mag(ball.vel_vec)
+                if abselv in vel_dict:
+                    vel_dict[abselv] += 1
+                else:
+                    vel_dict[abselv] = 1
+            f1 = gcurve(color=color.cyan, title='Der Graph')  # a graphics curve
+            for key in vel_dict.keys():
+                f1.plot(key, vel_dict[key])
+            vel_dict.clear()
 
 #        for sector in sectors:
 #            sector.clear()
