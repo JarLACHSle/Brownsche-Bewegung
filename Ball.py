@@ -22,7 +22,7 @@ class Ball(vpython.sphere):
 
         # zufälliger, normierter Start-Geschwindigkeitsvektor
         self.vel_vec = vpython.norm(vpython.vector.random())
-        #self.vel_vec = vpython.vector(1, 0, 0)
+        #self.vel_vec = vpython.vector(0, -1, 0)
         self.radius = radius
 
         self.masse = masse
@@ -32,8 +32,8 @@ class Ball(vpython.sphere):
 
     def move(self):
         '''bewegt das Teilchen um die Geschwindigkeit'''
-        self.pos += self.vel_vec * self.zeitschritt
         self.vel_vec -= GRAVITATION * self.zeitschritt
+        self.pos += self.vel_vec * self.zeitschritt
 
     def move_debug(self, moving):
         '''bewegt das Teilche um einen festen Wert'''

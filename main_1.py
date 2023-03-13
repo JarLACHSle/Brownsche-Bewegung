@@ -18,12 +18,12 @@ wall_top = box(pos=vector(0, HEIGHT/2, 0), color=color.white, size=vector(LENGHT
 DO_VELOCITY_PLOT = True
 
 # Tick-Faktor
-TIME_STEP = .005
+TIME_STEP = 0.5
 # REPULSE = 0.1
 
 # Setup Teilchen
 BALL_RADIUS = .05
-BALL_AMOUNT = 100
+BALL_AMOUNT = 300
 BALL_COLOR = color.black
 BALL_MASSE = 1
 
@@ -105,10 +105,10 @@ def main():
                     vel_dict[abselv] += 1
                 else:
                     vel_dict[abselv] = 1
-            f1 = gcurve(color=color.cyan, title='Der Graph')  # a graphics curve
-            for key in vel_dict.keys():
-                f1.plot(key, vel_dict[key])
-            vel_dict.clear()
+            #f1 = gcurve(color=color.cyan,)  # a graphics curve
+            #for key in vel_dict.keys():
+            #    f1.plot(key, vel_dict[key])
+            #vel_dict.clear()
 
 #        for sector in sectors:
 #            sector.clear()
