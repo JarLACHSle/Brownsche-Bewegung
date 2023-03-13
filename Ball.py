@@ -25,7 +25,7 @@ class Ball:
         self.z_vel = random.uniform(-1, 1)
         self.vel_vec = np.array([self.x_vel, self.y_vel, self.z_vel])
         norm = np.linalg.norm(self.vel_vec)
-        self.vel_vec = self.vel_vec/norm
+        self.vel_vec = 5*self.vel_vec/norm
                 
         self.radius = radius
 
@@ -73,7 +73,9 @@ class Ball:
     def handle_collision(self, b2,wall):
         """überprüft Kollision mit anderen Teilchen und berechnet neue Geschwindigkeit"""
         abstand = np.linalg.norm(b2.position - self.position)
-        if abstand <= self.radius + b2.radius and (self.last_collision != b2 or b2.last_collision != self or   		  self.last_collision==wall or b2.last_collision==wall):
+        if np.linalg.norm(self.vel_vec-b2.vel_vec) == 0:
+            pass
+        elif abstand <= self.radius + b2.radius and (self.last_collision != b2 or b2.last_collision != self or self.last_collision==wall or b2.last_collision==wall):
             # Zwischenspeicher für Geschwindigkeiten
             b1_vel_vec = self.vel_vec
             b2_vel_vec = b2.vel_vec
