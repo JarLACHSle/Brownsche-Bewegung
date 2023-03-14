@@ -17,11 +17,11 @@ TIME_STEP = 0.1
 # Setup Teilchen
 BALL_RADIUS = .005
 BALL_AMOUNT = 800
-BALL_COLOR = color.black
+BALL_COLOR = [color.black]
 BALL_MASSE = 0.5
 
-BROWNSCHESTEILCHEN_AMOUNT = 3
-BROWNSCHESTEILCHEN_COLOR = [color.red, color.cyan, color.magenta] # Muss die länge von Amount sein
+BROWNSCHESTEILCHEN_AMOUNT = 5
+BROWNSCHESTEILCHEN_COLOR = [color.red, color.cyan, color.magenta, color.yellow, color.green] # Sollte gleich sein, ansonsten wird nur die erste Farbe gewählt
 BROWNSCHESTEILCHEN_MASSE = 4
 BROWNSCHESTEILCHEN_RADIUS = 1.6
 LINE_COLOR = color.blue
@@ -51,13 +51,15 @@ def generate_balls(amount, radius, color, masse, can):
             ball = Ball.Ball(radius, color[i], masse, LENGHT, WIDTH, HEIGHT, TIME_STEP, canvas=can)
             balls.append(ball)
     else:
-        color = [color]
         for i in range(amount):
             ball = Ball.Ball(radius, color[0], masse, LENGHT, WIDTH, HEIGHT, TIME_STEP, canvas=can)
             balls.append(ball)
 
     return balls
 
+
+def write_text(number_of_teilchen, vanisches, time_in_layer):
+    return "Teilchen {}:\nSchichtaustritte: {}\nZeit in Schicht: {}\n".format(number_of_teilchen, vanisches, time_in_layer)
 
 def main():
     run = True
@@ -79,7 +81,21 @@ def main():
         line_3D.append(curve(color=LINE_COLOR, pos=ball.pos, retain=300, canvas=canvas_3D))
         line_2D.append(curve(color=LINE_COLOR, pos=vector(ball.pos.value[0], ball.pos.value[2]*-1, 0), retain=300, canvas=canvas_2D))
 
+    time_steps = 0
+    in_layer = []
+    vanisches = []
+    time_in_layer = []
+    ent_time = []
+    for i in range(BROWNSCHESTEILCHEN_AMOUNT):
+        in_layer.append(0)
+        vanisches.append(0)
+        time_in_layer.append(0)
+        ent_time.append(0)
+
     while run:
+        if time_steps == 100000:
+            time_steps = 0
+        time_steps += 1
         rate(60)
         for subcube in subcubes_list:
             subcube.clear()
@@ -92,15 +108,30 @@ def main():
         for i, ball in enumerate(brownsche_teilchen_3D):
             if ball.pos.value[1] - ball.radius > schichtdicke/2 or ball.pos.value[1] + ball.radius < - schichtdicke/2:
                 brownsche_teilchen_2D[i].visible = False
-                #line_2D.visible = False
+                #line_2D[i].visible = False
                 #line_2D[i].clear()
+                if in_layer[i]:
+                    vanisches[i] += 1
+                    time_in_layer[i] = time_steps - ent_time[i]
+                    in_layer[i] = False
             else:
+                #line_2D[i].visible = True
+                if not in_layer[i]:
+                    in_layer[i] = True
+                    ent_time[i] = time_steps
                 brownsche_teilchen_2D[i].visible = True
+
             brownsche_teilchen_2D[i].pos = vector(ball.pos.value[0], ball.pos.value[2]*-1, 0)
 
             # führt die Linie weiter
             line_2D[i].append(pos=brownsche_teilchen_2D[i].pos)
             line_3D[i].append(pos=ball.pos)
+
+        text = ""
+        for i in range(BROWNSCHESTEILCHEN_AMOUNT):
+            text += write_text(i+1, vanisches[i], time_in_layer[i])
+        canvas_3D.caption = "Zeitschritt:{}\n".format(time_steps)+text
+
 
 
 if __name__ == '__main__':
