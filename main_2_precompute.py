@@ -79,18 +79,19 @@ def update_graph2(num2):
             if zlist[index]+ BROWNSCHESTEILCHEN_RADIUS < bot_layer or zlist[index]-BROWNSCHESTEILCHEN_RADIUS > top_layer:
                 layered_xlist[index] = None
                 layered_ylist[index] = None
+                if (in_layer==True):
+                    vanishes+=1
+                    count=0
+                    layer_time=num2-ent_time
+                    in_layer=False
+            if (zlist[index]- BROWNSCHESTEILCHEN_RADIUS <= top_layer and zlist[index]+BROWNSCHESTEILCHEN_RADIUS >= bot_layer) and count == 0: 
+                in_layer = True
+                ent_time = num2
+                count += 1
         elif zlist[index]+ zlist[index] < bot_layer or zlist[index]- BALL_RADIUS > top_layer:
             layered_xlist[index] = None
             layered_ylist[index] = None
-    if (brownsches_teilchen.position[2]+BROWNSCHESTEILCHEN_RADIUS < bot_layer or brownsches_teilchen.position[2]-BROWNSCHESTEILCHEN_RADIUS > top_layer) and in_layer:
-        vanishes +=1
-        in_layer = False
-        layer_time = num2 - ent_time
-        count = 0
-    if (brownsches_teilchen.position[2]- BROWNSCHESTEILCHEN_RADIUS <= top_layer and brownsches_teilchen.position[2] + BROWNSCHESTEILCHEN_RADIUS >= bot_layer) and count == 0:
-        in_layer = True
-        ent_time = num2
-        count += 1
+   
     # Für Projektion in die x-y-Ebene:
     line2.set_data(brown_pos[:num2,:2].T)
     plane_graph.set_offsets(np.column_stack([layered_xlist, layered_ylist]))
