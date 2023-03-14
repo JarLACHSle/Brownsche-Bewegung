@@ -13,9 +13,9 @@ class Ball:
         self.my_sector = None
 
         # Startwert und aktuelle Position
-        self.x = self.original_x = random.randint(0 + radius, self.window_width - radius)
-        self.y = self.original_y = random.randint(0 + radius, self.window_height - radius)
-        self.z = self.original_z = random.randint(0 + radius, self.window_depth - radius)
+        self.x = self.original_x = random.randint(0 + int(radius), int(self.window_width - radius))
+        self.y = self.original_y = random.randint(0 + int(radius), int(self.window_height - radius))
+        self.z = self.original_z = random.randint(0 + int(radius), int(self.window_depth - radius))
         self.position = np.array([self.x, self.y, self.z], dtype=float)
         self.zeitschritt = zeitschritt
 
