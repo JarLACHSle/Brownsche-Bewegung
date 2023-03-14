@@ -3,21 +3,30 @@ import numpy as np
 from vpython import *
 import Ball
 import Sector
-
-# Setup Fenster
+import copy
 # (lenght : x; height: y; width: z)
-LENGHT, HEIGHT, WIDTH = 20, 20, 20
+LENGHT = HEIGHT = WIDTH = 20
+# Setup Fenster
+canvas_2D = canvas(title='Top View', userzoom=False, userspin=False, userpan=False, width=500, height=300,)
+wall = box(pos=vector(0, 0, 0), color=color.white, size=vector(LENGHT, HEIGHT, .1))
+
+canvas_3D = canvas(title='3D View',width=500, height=300,)
 wall_bottom = box(pos=vector(0, -HEIGHT / 2, 0), color=color.white, size=vector(LENGHT, .1, WIDTH))
 wall_back = box(pos=vector(0, 0, -WIDTH / 2), color=color.white, size=vector(LENGHT, HEIGHT, .1))
 wall_left = box(pos=vector(-LENGHT / 2, 0, 0), color=color.white, size=vector(.1, HEIGHT, WIDTH))
-wall_right = box(pos=vector(LENGHT / 2, 0, 0), color=color.white, size=vector(.1, HEIGHT, WIDTH))
-wall_top = box(pos=vector(0, HEIGHT / 2, 0), color=color.white, size=vector(LENGHT, .1, WIDTH))
-# wall_front = box(pos=vector(0, 0, WIDTH/2), color=color.white, size=vector(LENGHT, HEIGHT, .1))
+wall_right = box(pos=vector(LENGHT / 2, 0, 0), color=color.white, size=vector(.1, HEIGHT, WIDTH), opacity=.1)
+wall_top = box(pos=vector(0, HEIGHT / 2, 0), color=color.white, size=vector(LENGHT, .1, WIDTH), opacity=.1)
+wall_front = box(pos=vector(0, 0, WIDTH/2), color=color.white, size=vector(LENGHT, HEIGHT, .1), opacity=.1)
+
+#setup Schicht
+schichtdicke = 6
+top_layer = box(pos=vector(0, schichtdicke/2, 0), color=color.green, size=vector(LENGHT, .1, WIDTH), opacity=.1)
+bot_layer = box(pos=vector(0, -schichtdicke/2, 0), color=color.green, size=vector(LENGHT, .1, WIDTH), opacity=.2)
 
 DO_VELOCITY_PLOT = True
 
 # Tick-Faktor
-TIME_STEP = 0.5
+TIME_STEP = 0.1
 # REPULSE = 0.1
 
 # Setup Teilchen
@@ -27,15 +36,15 @@ BALL_COLOR = color.black
 BALL_MASSE = 1
 
 BROWNSCHESTEILCHEN_MASSE = 40
-BROWNSCHESTEILCHEN_RADIUS = 2
+BROWNSCHESTEILCHEN_RADIUS = 1
 BROWNSCHESTEILCHEN_COLOR = color.red
 
 
-def generate_balls(amount):
+def generate_balls(amount, can):
     '''initialisert eine Liste aller (nicht-brownschen) Teilchen'''
     balls = []
     for i in range(amount):
-        ball = Ball.Ball(BALL_RADIUS, BALL_COLOR, BALL_MASSE, LENGHT, WIDTH, HEIGHT, TIME_STEP)
+        ball = Ball.Ball(BALL_RADIUS, BALL_COLOR, BALL_MASSE, LENGHT, WIDTH, HEIGHT, TIME_STEP, canvas=can)
         balls.append(ball)
 
     return balls
@@ -76,27 +85,40 @@ def generate_sectors(amount_sqr):
 def main():
     run = True
     # generiert das brownsche Teilchen als ersten Eintrag einer Liste aller Teilchen
-    brownsches_teilchen = Ball.Ball(BROWNSCHESTEILCHEN_RADIUS, BROWNSCHESTEILCHEN_COLOR, BROWNSCHESTEILCHEN_MASSE,
-                                    LENGHT, WIDTH, HEIGHT, TIME_STEP)
-    balls = [brownsches_teilchen] + generate_balls(BALL_AMOUNT)
+    brownsches_teilchen_3D = Ball.Ball(BROWNSCHESTEILCHEN_RADIUS, BROWNSCHESTEILCHEN_COLOR, BROWNSCHESTEILCHEN_MASSE,
+                                    LENGHT, WIDTH, HEIGHT, TIME_STEP, canvas=canvas_3D)
+    balls = [brownsches_teilchen_3D] + generate_balls(BALL_AMOUNT, canvas_3D)
+    brownsches_teilchen_2D = Ball.Ball(BROWNSCHESTEILCHEN_RADIUS, BROWNSCHESTEILCHEN_COLOR, BROWNSCHESTEILCHEN_MASSE,
+                                    LENGHT, WIDTH, HEIGHT, TIME_STEP, canvas=canvas_2D)
+    brownsches_teilchen_2D.pos = vector(brownsches_teilchen_3D.pos.value[0], brownsches_teilchen_3D.pos.value[2], 0)
+
     # sectors = generate_sectors()
     vel_dict = {}
     # Linie hinter dem Ball
-    c = curve(color=color.yellow, pos=brownsches_teilchen.pos, retain=150)
+    c_3d = curve(color=color.yellow, pos=brownsches_teilchen_3D.pos, retain=150)
+    c_2d = curve(color=color.yellow, pos=brownsches_teilchen_2D.pos, retain=150, canvas=canvas_2D)
 
     while run:
         rate(60)
-        k = keysdown()
-        if 'left' in k:
-            run = False
-        for ball in balls:
+        for j, ball in enumerate(balls):
             ''' Bewegung und Kollision aller Teilchen'''
             ball.handle_border_collision()
             for i in range(balls.index(ball) + 1, len(balls)):
                 ball.handle_collision(balls[i])
             ball.move()
+
+        if brownsches_teilchen_3D.pos.value[1] - brownsches_teilchen_3D.radius > schichtdicke/2 or brownsches_teilchen_3D.pos.value[1] + brownsches_teilchen_3D.radius < - schichtdicke/2:
+            brownsches_teilchen_2D.visible = False
+            #c_2d.visible = False
+            #c_2d.clear()
+        else:
+            brownsches_teilchen_2D.visible = True
+            #c_2d.visible = True
+            brownsches_teilchen_2D.pos = vector(brownsches_teilchen_3D.pos.value[0], brownsches_teilchen_3D.pos.value[2]*-1, 0)
+        c_2d.append(pos=vector(brownsches_teilchen_3D.pos.value[0], brownsches_teilchen_3D.pos.value[2]*-1, 0))
+
         # führt die Linie weiter
-        c.append(pos=brownsches_teilchen.pos)
+        c_3d.append(pos=brownsches_teilchen_3D.pos)
 
         if DO_VELOCITY_PLOT:
             '''falls True, wird die Geschwindigkeitsverteilung über den gesamten Verlauf der Simulation aufgezeichnet'''
