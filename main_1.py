@@ -54,17 +54,18 @@ def do_everything():
 def update_graph1(num):
     '''\3D-Darstellung\:zeichnet die Verschiebung der Position ins Koordinatensystem'''
     global xlist,ylist,zlist,brown_pos,count
+    newballs = do_everything()
     count += 1
-    xlist = [ball.position[0] for ball in do_everything()]
-    ylist = [ball.position[1] for ball in do_everything()]
-    zlist = [ball.position[2] for ball in do_everything()]
+    xlist = [ball.position[0] for ball in newballs]
+    ylist = [ball.position[1] for ball in newballs]
+    zlist = [ball.position[2] for ball in newballs]
     brown_pos[count-1] = brownsches_teilchen.position
     graph._offsets3d = (xlist, ylist, zlist)
     line1.set_data(brown_pos[:num,:2].T)
     line1.set_3d_properties(brown_pos[:num, 2])
     title1.set_text('3D-Darstellung, Zeit={}'.format(num))
 
-def update_graph2(num):
+def update_graph2(num2):
     '''\Ebenenprojektion\:zeichnet die Verschiebung der Position ins Koordinatensystem
     ACHTUNG: funktioniert  nur, wenn vorher auch update_graph1 aufgerufen wurde.'''
     global xlist,ylist,zlist,brown_pos,count,vanishes
@@ -72,9 +73,9 @@ def update_graph2(num):
         vanishes +=1
     brown_pos[count-1] = brownsches_teilchen.position
     # Für Projektion in die x-z-Ebene:
-    line2.set_data(brown_pos[:num,0],brown_pos[:num,2])
+    line2.set_data(brown_pos[:num2,0],brown_pos[:num2,2])
     plane_graph.set_offsets(np.column_stack([xlist, zlist]))
-    title2.set_text('Seitenansicht, Zeit={}, Anzahl Schichtaustritte ={}'.format(num,vanishes))
+    title2.set_text('Seitenansicht, Zeit={}, Anzahl Schichtaustritte ={}'.format(num2,vanishes))
 
 # initialisiert die Teilchen und Sektoren
 brownsches_teilchen = Ball.Ball(BROWNSCHESTEILCHEN_RADIUS, BROWNSCHESTEILCHEN_COLOR, BROWNSCHESTEILCHEN_MASSE, WIDTH, HEIGHT, DEPTH, TIME_STEP)
