@@ -24,11 +24,11 @@ in_layer = True
 
 # Tick-Faktor
 TIME_STEP = 1
-num_steps = 100
+num_steps = 500
 
 # Setup Teilchen
 BALL_RADIUS = 0.5 
-BALL_AMOUNT = 100
+BALL_AMOUNT = 600
 BALL_COLOR = "blue"
 BALL_MASSE = 0.5
 
@@ -116,7 +116,6 @@ balls = [brownsches_teilchen] + generate_balls(BALL_AMOUNT)
 
 # setzt das brownsche Teilchen in die Mitte und nimmt ihm die Anfangsgeschwindigkeit
 brownsches_teilchen.position = np.array([WIDTH/2,HEIGHT/2,DEPTH/2],dtype =float)
-brownsches_teilchen.vel_vec = np.array([0,0,0])
 
 # initialisiert die Sektoren
 Mothercube = Cube.Cubesector((WIDTH/2,HEIGHT/2,DEPTH/2), WIDTH/2)
@@ -162,7 +161,7 @@ line1, = ax1.plot([],[],[], c="green")
 graph = ax1.scatter(xlist, ylist, zlist, s= sizes1, c=colors)
 #------------------------------------------------------------------------------
 # Für XY-Startplot stattdessen:
-fig2 = plt.figure(1,dpi=71)
+fig2 = plt.figure(1,dpi=142)
 ax2 = fig2.add_subplot(111)
 ax2.set_aspect(1)
 title2 = ax2.set_title('Top-Down Ansicht')
@@ -180,5 +179,8 @@ plane_graph = ax2.scatter(xlist, ylist, s= sizes2, c =colors)
 ani1 = matplotlib.animation.FuncAnimation(fig1, update_graph1, num_steps, interval=50, blit=False)
 ani2 = matplotlib.animation.FuncAnimation(fig2, update_graph2, num_steps, interval=50, blit=False)
 
+ani1.save('Brownsche_Bewegung_Render_3D.mp4', fps=30 )
+ani2.save('Brownsche_Bewegung_Render_XY.mp4', fps=30 )
+print("saved!")
 
 plt.show()  
