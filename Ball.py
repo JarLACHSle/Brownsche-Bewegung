@@ -10,8 +10,6 @@ class Ball:
         self.window_height = HEIGHT
         self.window_depth = DEPTH
 
-        self.my_sector = None
-
         # Startwert und aktuelle Position
         self.x = self.original_x = random.randint(0 + int(radius), int(self.window_width - radius))
         self.y = self.original_y = random.randint(0 + int(radius), int(self.window_height - radius))
@@ -25,24 +23,22 @@ class Ball:
         self.z_vel = random.uniform(-1, 1)
         self.vel_vec = np.array([self.x_vel, self.y_vel, self.z_vel])
         norm = np.linalg.norm(self.vel_vec)
-        self.vel_vec = 5*self.vel_vec/norm
-                
-        self.radius = radius
+        self.vel_vec = 5 * self.vel_vec / norm
 
+        self.radius = radius
         self.masse = masse
-        self.acceleration = np.array([0, 0, 0])
         self.color = color
         self.last_collision = None  # Teilchen mit dem self als letztes kollidiert ist
 
     def move(self):
         '''bewegt das Teilchen um die Geschwindigkeit'''
-        self.position += self.vel_vec* self.zeitschritt
+        self.position += self.vel_vec * self.zeitschritt
 
     def move_debug(self, moving):
         '''bewegt das Teilchen um einen festen Wert'''
         self.position += moving
 
-    def handle_border_collision(self,wall):
+    def handle_border_collision(self, wall):
         '''überprüft Kollision mit der Wand, invertiert Geschwindigkeitskomponente
         und setzt das Teilchen zurück ins Fenster'''
         if self.position[2] + self.radius >= self.window_depth:
@@ -70,22 +66,20 @@ class Ball:
             self.move_debug(np.array([-self.position[0] + self.radius, 0, 0]))
             self.last_collision = wall
 
-    def handle_collision(self, b2,wall):
+    def handle_collision(self, b2, wall):
         """überprüft Kollision mit anderen Teilchen und berechnet neue Geschwindigkeit"""
         abstand = np.linalg.norm(b2.position - self.position)
-        if np.linalg.norm(self.vel_vec-b2.vel_vec) == 0:
+        if np.linalg.norm(self.vel_vec - b2.vel_vec) == 0:
             pass
-        elif abstand <= self.radius + b2.radius and (self.last_collision != b2 or b2.last_collision != self or self.last_collision==wall or b2.last_collision==wall):
+        elif abstand <= self.radius + b2.radius and (self.last_collision != b2 or b2.last_collision != self or self.last_collision == wall or b2.last_collision == wall):
             # Zwischenspeicher für Geschwindigkeiten
             b1_vel_vec = self.vel_vec
             b2_vel_vec = b2.vel_vec
 
             # Berechnung elastischer Stoß
-            self.vel_vec = (self.masse * b1_vel_vec + b2.masse * (2 * b2_vel_vec - b1_vel_vec)) / (self.masse + b2.masse)
+            self.vel_vec = (self.masse * b1_vel_vec + b2.masse * (2 * b2_vel_vec - b1_vel_vec)) / (
+                        self.masse + b2.masse)
             b2.vel_vec = (b2.masse * b2_vel_vec + self.masse * (2 * b1_vel_vec - b2.vel_vec)) / (self.masse + b2.masse)
 
             self.last_collision = b2
             b2.last_collision = self
-            
-            #Debug
-            #print("Stoß!, Farben ={}".format(self.color+b2.color))

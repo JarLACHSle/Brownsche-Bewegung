@@ -1,19 +1,17 @@
 import numpy as np
 from matplotlib import pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.animation
-
 
 import Ball
 import Cube
 
 # Setup Fenster 
-WIDTH = HEIGHT = DEPTH = 200 
+WIDTH = HEIGHT = DEPTH = 200
 
 # Setup Horizontalschicht
-schichtdicke = 4*16
-bot_layer = DEPTH/2-schichtdicke/2
-top_layer = DEPTH/2+schichtdicke/2
+schichtdicke = 4 * 16
+bot_layer = DEPTH / 2 - schichtdicke / 2
+top_layer = DEPTH / 2 + schichtdicke / 2
 
 # Anfangswerte für die Zählung, nicht anpassen
 vanishes = 0
@@ -27,16 +25,17 @@ TIME_STEP = 1
 num_steps = 500
 
 # Setup Teilchen
-BALL_RADIUS = 0.5 
+BALL_RADIUS = 0.5
 BALL_AMOUNT = 600
 BALL_COLOR = "blue"
 BALL_MASSE = 0.5
 
-BROWNSCHESTEILCHEN_MASSE = 4  
-BROWNSCHESTEILCHEN_RADIUS = 16 
+BROWNSCHESTEILCHEN_MASSE = 4
+BROWNSCHESTEILCHEN_RADIUS = 16
 BROWNSCHESTEILCHEN_COLOR = "red"
 
 GRAVITATION = 0.098
+
 
 def generate_balls(amount):
     '''initialisert eine Liste aller (nicht-brownschen) Teilchen'''
@@ -59,128 +58,133 @@ def do_everything():
         subcube.move_ball(G=GRAVITATION)
     return balls
 
-    
+
 def update_graph1(num):
     '''\3D-Darstellung\:zeichnet die Verschiebung der Position ins Koordinatensystem'''
-    global xlist,ylist,zlist,brown_pos
-    xlist = [computed_positions[num,index,0] for index in range(BALL_AMOUNT+1)]
-    ylist = [computed_positions[num,index,1] for index in range(BALL_AMOUNT+1)]
-    zlist = [computed_positions[num,index,2] for index in range(BALL_AMOUNT+1)]
+    global xlist, ylist, zlist, brown_pos
+    xlist = [computed_positions[num, index, 0] for index in range(BALL_AMOUNT + 1)]
+    ylist = [computed_positions[num, index, 1] for index in range(BALL_AMOUNT + 1)]
+    zlist = [computed_positions[num, index, 2] for index in range(BALL_AMOUNT + 1)]
     graph._offsets3d = (xlist, ylist, zlist)
-    line1.set_data(brown_pos[:num,:2].T)
+    line1.set_data(brown_pos[:num, :2].T)
     line1.set_3d_properties(brown_pos[:num, 2])
     title1.set_text('3D-Darstellung, Zeit={}'.format(num))
+
 
 def update_graph2(num2):
     '''\Ebenenprojektion\:zeichnet die Verschiebung der Position ins Koordinatensystem;
     schließt Teilchen außerhalb der Horizontalschicht aus der Visualisierung aus und zählt die Schritte,
     die das Brownsche Teilchen innerhalb verbringt
-    ACHTUNG: funktioniert  nur, wenn vorher auch update_graph1 aufgerufen wurde.'''
-    global xlist,ylist,zlist,brown_pos,vanishes, sizes2, colors,plane_graph, in_layer, ent_time, count, layer_time
+    ACHTUNG: funktioniert nur, wenn vorher auch update_graph1 aufgerufen wurde.'''
+    global xlist, ylist, zlist, brown_pos, vanishes, sizes2, colors, plane_graph, in_layer, ent_time, count, layer_time
     layered_xlist = xlist.copy()
     layered_ylist = ylist.copy()
-    #setzt Indikatoren bei einer Wiederholung der Animation zurück
+    # setzt Indikatoren bei einer Wiederholung der Animation zurück
     if num2 == 0:
         vanishes = 0
         ent_time = 0
         layer_time = 0
-    #löscht Teilchen außerhalb der Schicht aus layered_xlist/_ylist, ohne die Länge der Liste zu verändern
+    # löscht Teilchen außerhalb der Schicht aus layered_xlist/_ylist, ohne die Länge der Liste zu verändern
     for index in reversed(range(len(zlist))):
         if index == 0:
-            if zlist[index]+ BROWNSCHESTEILCHEN_RADIUS < bot_layer or zlist[index]-BROWNSCHESTEILCHEN_RADIUS > top_layer:
+            if zlist[index] + BROWNSCHESTEILCHEN_RADIUS < bot_layer or zlist[index] - BROWNSCHESTEILCHEN_RADIUS > top_layer:
                 layered_xlist[index] = None
                 layered_ylist[index] = None
-                if (in_layer==True):
-                    vanishes+=1 # wie oft das Brownsche Teilchen die Schicht verlassen hat
-                    count=0 # Zählvariable, damit vanishes nicht in jedem Schritt außerhalb der Schicht erhöht wird
-                    layer_time=num2-ent_time #aktuelle Zeit(Austrittszeit) - Eintrittszeit
-                    print('Austritt {}: nach {} Schritten'.format(vanishes,layer_time))
-                    in_layer=False
-            if (zlist[index]- BROWNSCHESTEILCHEN_RADIUS <= top_layer and zlist[index]+BROWNSCHESTEILCHEN_RADIUS >= bot_layer) and count == 0: 
+                if (in_layer == True):
+                    vanishes += 1  # wie oft das Brownsche Teilchen die Schicht verlassen hat
+                    count = 0  # Zählvariable, damit vanishes nicht in jedem Schritt außerhalb der Schicht erhöht wird
+                    layer_time = num2 - ent_time  # aktuelle Zeit(Austrittszeit) - Eintrittszeit
+                    print('Austritt {}: nach {} Schritten'.format(vanishes, layer_time))
+                    in_layer = False
+            if (zlist[index] - BROWNSCHESTEILCHEN_RADIUS <= top_layer and zlist[
+                index] + BROWNSCHESTEILCHEN_RADIUS >= bot_layer) and count == 0:
                 in_layer = True
-                ent_time = num2 #Teilchen ist gerade in die Schicht eingetreten
+                ent_time = num2  # Teilchen ist gerade in die Schicht eingetreten
                 count += 1
-        elif zlist[index]+ BALL_RADIUS < bot_layer or zlist[index]- BALL_RADIUS > top_layer:
+        elif zlist[index] + BALL_RADIUS < bot_layer or zlist[index] - BALL_RADIUS > top_layer:
             layered_xlist[index] = None
             layered_ylist[index] = None
-   
+
     # Für Projektion in die x-y-Ebene:
-    line2.set_data(brown_pos[:num2,:2].T)
+    line2.set_data(brown_pos[:num2, :2].T)
     plane_graph.set_offsets(np.column_stack([layered_xlist, layered_ylist]))
-    #plane_graph = ax2.scatter(layered_xlist,layered_ylist,s= sizes2, c =colors)
+    # plane_graph = ax2.scatter(layered_xlist,layered_ylist,s= sizes2, c =colors)
     title2.set_text('Top-Down Ansicht, Anzahl Schichtaustritte ={}, Schichtzeit ={}'.format(vanishes, layer_time))
-#------------------------------------------------------------------------------
+
+
+# ------------------------------------------------------------------------------
 # initialisiert die Teilchen 
-brownsches_teilchen = Ball.Ball(BROWNSCHESTEILCHEN_RADIUS, BROWNSCHESTEILCHEN_COLOR, BROWNSCHESTEILCHEN_MASSE, WIDTH, HEIGHT, DEPTH, TIME_STEP)
+brownsches_teilchen = Ball.Ball(BROWNSCHESTEILCHEN_RADIUS, BROWNSCHESTEILCHEN_COLOR, BROWNSCHESTEILCHEN_MASSE, WIDTH,
+                                HEIGHT, DEPTH, TIME_STEP)
 balls = [brownsches_teilchen] + generate_balls(BALL_AMOUNT)
 
 # setzt das brownsche Teilchen in die Mitte und nimmt ihm die Anfangsgeschwindigkeit
-brownsches_teilchen.position = np.array([WIDTH/2,HEIGHT/2,DEPTH/2],dtype =float)
+brownsches_teilchen.position = np.array([WIDTH / 2, HEIGHT / 2, DEPTH / 2], dtype=float)
 
 # initialisiert die Sektoren
-Mothercube = Cube.Cubesector((WIDTH/2,HEIGHT/2,DEPTH/2), WIDTH/2)
+Mothercube = Cube.Cubesector((WIDTH / 2, HEIGHT / 2, DEPTH / 2), WIDTH / 2)
 subcubes_list = Mothercube.subdivide()
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 '''Hauptschleife; erstellt ein dreidimensionales Array [num_steps*(BALL_AMOUNT+1)*3] (+1 wegen des brownschen Teilchens)
-  und berechnet alle Positionen der Teilchen vor, indem wiederholt do_everything aufgerufen wird'''                            
-computed_positions = np.empty((num_steps, BALL_AMOUNT+1,3))
-brown_pos = np.empty((num_steps,3))
-print("Starte Berechnung. Anzahl Bälle = {}, Anzahl Schritte = {}".format(BALL_AMOUNT,num_steps))
+  und berechnet alle Positionen der Teilchen vor, indem wiederholt do_everything aufgerufen wird'''
+computed_positions = np.empty((num_steps, BALL_AMOUNT + 1, 3))
+brown_pos = np.empty((num_steps, 3))
+print("Starte Berechnung. Anzahl Bälle = {}, Anzahl Schritte = {}".format(BALL_AMOUNT, num_steps))
 
 for i1 in range(num_steps):
-    for i2,ball in enumerate(do_everything()):
-        computed_positions[i1,i2,0] = ball.position[0]
-        computed_positions[i1,i2,1] = ball.position[1]
-        computed_positions[i1,i2,2] = ball.position[2]
-    if i1%(num_steps/10) == 0:
-        print("{}% abgeschlossen".format((i1/num_steps)*100))
-    brown_pos[i1,0] = brownsches_teilchen.position[0]
-    brown_pos[i1,1] = brownsches_teilchen.position[1]
-    brown_pos[i1,2] = brownsches_teilchen.position[2]
-#------------------------------------------------------------------------------
+    for i2, ball in enumerate(do_everything()):
+        computed_positions[i1, i2, 0] = ball.position[0]
+        computed_positions[i1, i2, 1] = ball.position[1]
+        computed_positions[i1, i2, 2] = ball.position[2]
+    if i1 % (num_steps / 10) == 0:
+        print("{}% abgeschlossen".format((i1 / num_steps) * 100))
+    brown_pos[i1, 0] = brownsches_teilchen.position[0]
+    brown_pos[i1, 1] = brownsches_teilchen.position[1]
+    brown_pos[i1, 2] = brownsches_teilchen.position[2]
+# ------------------------------------------------------------------------------
 # Positionen für den Start-Plot, damit später ._offset3D benutzt werden kann
 xlist = [ball.position[0] for ball in balls]
 ylist = [ball.position[1] for ball in balls]
 zlist = [ball.position[2] for ball in balls]
 
-#initialisiert das Fenster
-fig1 = plt.figure(0,dpi=142)
+# initialisiert das Fenster
+fig1 = plt.figure(0, dpi=142)
 ax1 = fig1.add_subplot(111, projection='3d')
 ax1.grid(False)
 title1 = ax1.set_title('3D-Darstellung')
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # ordnet den Scatter-Punkten die richtigen Farben und Radien zu 
 # Radien sind nicht vollständig repräsentativ, die Methode aus sizes2 (unten) funktioniert in 3D leider nicht.
-sizes1 = np.ones(BALL_AMOUNT+1)*(2*BALL_RADIUS)**2
-sizes1[0] = BROWNSCHESTEILCHEN_RADIUS**2
-colors = [BALL_COLOR]*(BALL_AMOUNT+1)
+sizes1 = np.ones(BALL_AMOUNT + 1) * (2 * BALL_RADIUS) ** 2
+sizes1[0] = BROWNSCHESTEILCHEN_RADIUS ** 2
+colors = [BALL_COLOR] * (BALL_AMOUNT + 1)
 colors[0] = BROWNSCHESTEILCHEN_COLOR
 
 # zeichnet den Start-Plot (3D) und initialisiert die Spur des Brownschen Teilchens
-line1, = ax1.plot([],[],[], c="green")
-graph = ax1.scatter(xlist, ylist, zlist, s= sizes1, c=colors)
-#------------------------------------------------------------------------------
+line1, = ax1.plot([], [], [], c="green")
+graph = ax1.scatter(xlist, ylist, zlist, s=sizes1, c=colors)
+# ------------------------------------------------------------------------------
 # Für XY-Startplot stattdessen:
-fig2 = plt.figure(1,dpi=142)
+fig2 = plt.figure(1, dpi=142)
 ax2 = fig2.add_subplot(111)
 ax2.set_aspect(1)
 title2 = ax2.set_title('Top-Down Ansicht')
 
-#"maßstabsgetreue" Teilchengrößen in 2D
-sizes2 = np.ones(BALL_AMOUNT+1)*((ax2.get_window_extent().width*(BALL_RADIUS/WIDTH)) ** 2)* 72./fig1.dpi
-sizes2[0] = ((ax2.get_window_extent().width*(BROWNSCHESTEILCHEN_RADIUS/WIDTH)) ** 2)* 72./fig1.dpi
+# "maßstabsgetreue" Teilchengrößen in 2D
+sizes2 = np.ones(BALL_AMOUNT + 1) * ((ax2.get_window_extent().width * (BALL_RADIUS / WIDTH)) ** 2) * 72. / fig1.dpi
+sizes2[0] = ((ax2.get_window_extent().width * (BROWNSCHESTEILCHEN_RADIUS / WIDTH)) ** 2) * 72. / fig1.dpi
 
 # zeichnet den Start-Plot (2D) und initialisiert die 2D-Spur des Brownschen Teilchens
-line2, = ax2.plot([],[], c="green")
-plane_graph = ax2.scatter(xlist, ylist, s= sizes2, c =colors)
+line2, = ax2.plot([], [], c="green")
+plane_graph = ax2.scatter(xlist, ylist, s=sizes2, c=colors)
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Animiert die berechneten Veränderungen
 ani1 = matplotlib.animation.FuncAnimation(fig1, update_graph1, num_steps, interval=50, blit=False)
 ani2 = matplotlib.animation.FuncAnimation(fig2, update_graph2, num_steps, interval=50, blit=False)
 
-ani1.save('Brownsche_Bewegung_Render_3D.mp4', fps=30 )
-ani2.save('Brownsche_Bewegung_Render_XY.mp4', fps=30 )
+ani1.save('Brownsche_Bewegung_Render_3D.mp4', fps=30)
+ani2.save('Brownsche_Bewegung_Render_XY.mp4', fps=30)
 print("saved!")
 
-plt.show()  
+plt.show()

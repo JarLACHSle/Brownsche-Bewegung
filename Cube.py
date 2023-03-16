@@ -45,9 +45,7 @@ class Cubesector:
     
     def clear(self):
         '''löscht die Zuordnung'''
-        for ball in self.balls:
-            ball.my_sector = None
-        self.balls = []
+        self.balls.clear()
     
     def move_ball(self,G):
         ''' Bewegung und Kollision aller Teilchen'''
