@@ -1,6 +1,5 @@
 class Cubesector:
     def __init__(self, center, length):
-
         self.center = center
         self.length = length
         self.balls = []
@@ -25,9 +24,7 @@ class Cubesector:
 
     def clear(self):
         '''löscht die Zuordnung'''
-        for ball in self.balls:
-            ball.my_sector = None
-        self.balls = []
+        self.balls.clear()
 
     def get_subcube(self, ball):
         '''

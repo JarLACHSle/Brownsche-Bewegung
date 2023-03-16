@@ -8,7 +8,6 @@ class Ball(vpython.sphere):
 
     def __init__(self, radius, color, masse, length, width, height, zeitschritt, **args):
         super().__init__(**args)
-
         self.window_length = length
         self.window_width = width
         self.window_height = height
@@ -22,11 +21,9 @@ class Ball(vpython.sphere):
 
         # zufälliger, normierter Start-Geschwindigkeitsvektor
         self.vel_vec = vpython.norm(vpython.vector.random())
-        #self.vel_vec = vpython.vector(0, -1, 0)
-        self.radius = radius
 
+        self.radius = radius
         self.masse = masse
-        self.acceleration = ([0, 0])
         self.color = color
         self.last_collision = None  # Teilchen mit dem self als letztes kollidiert ist
 

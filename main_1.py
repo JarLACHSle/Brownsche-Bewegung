@@ -1,9 +1,6 @@
-import matplotlib.pyplot as plt
-import numpy as np
 from vpython import *
 import Ball
 import Cube
-import copy
 # (lenght : x; height: y; width: z)
 LENGHT = HEIGHT = WIDTH = 20
 
@@ -12,7 +9,6 @@ schichtdicke = 6
 
 # Tick-Faktor
 TIME_STEP = 0.1
-# REPULSE = 0.1
 
 # Setup Teilchen
 BALL_RADIUS = .005
@@ -21,7 +17,8 @@ BALL_COLOR = [color.black]
 BALL_MASSE = 0.5
 
 BROWNSCHESTEILCHEN_AMOUNT = 5
-BROWNSCHESTEILCHEN_COLOR = [color.red, color.cyan, color.magenta, color.yellow, color.green] # Sollte gleich sein, ansonsten wird nur die erste Farbe gewählt
+# Anzahl der Farben >= Amount: Farben werden gewählt; Anzahl der Farben < Amount: Nur erste Farbe
+BROWNSCHESTEILCHEN_COLOR = [color.red, color.cyan, color.magenta, color.yellow, color.green]
 BROWNSCHESTEILCHEN_MASSE = 4
 BROWNSCHESTEILCHEN_RADIUS = 1.6
 LINE_COLOR = color.blue
@@ -46,7 +43,7 @@ bot_layer = box(pos=vector(0, -schichtdicke/2, 0), color=color.green, size=vecto
 def generate_balls(amount, radius, color, masse, can):
     '''initialisert eine Liste aller (nicht-brownschen) Teilchen'''
     balls = []
-    if isinstance(color, list) and amount == len(color):
+    if isinstance(color, list) and amount <= len(color):
         for i in range(amount):
             ball = Ball.Ball(radius, color[i], masse, LENGHT, WIDTH, HEIGHT, TIME_STEP, canvas=can)
             balls.append(ball)
@@ -108,30 +105,25 @@ def main():
         for i, ball in enumerate(brownsche_teilchen_3D):
             if ball.pos.value[1] - ball.radius > schichtdicke/2 or ball.pos.value[1] + ball.radius < - schichtdicke/2:
                 brownsche_teilchen_2D[i].visible = False
-                #line_2D[i].visible = False
-                #line_2D[i].clear()
                 if in_layer[i]:
                     vanisches[i] += 1
                     time_in_layer[i] = time_steps - ent_time[i]
                     in_layer[i] = False
             else:
-                #line_2D[i].visible = True
                 if not in_layer[i]:
                     in_layer[i] = True
                     ent_time[i] = time_steps
                 brownsche_teilchen_2D[i].visible = True
 
             brownsche_teilchen_2D[i].pos = vector(ball.pos.value[0], ball.pos.value[2]*-1, 0)
-
             # führt die Linie weiter
             line_2D[i].append(pos=brownsche_teilchen_2D[i].pos)
             line_3D[i].append(pos=ball.pos)
 
-        text = ""
+        printed_text = ""
         for i in range(BROWNSCHESTEILCHEN_AMOUNT):
-            text += write_text(i+1, vanisches[i], time_in_layer[i])
-        canvas_3D.caption = "Zeitschritt:{}\n".format(time_steps)+text
-
+            printed_text += write_text(i + 1, vanisches[i], time_in_layer[i])
+        canvas_3D.caption = "Zeitschritt:{}\n".format(time_steps) + printed_text
 
 
 if __name__ == '__main__':
