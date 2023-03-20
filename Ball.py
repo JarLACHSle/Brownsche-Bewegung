@@ -10,6 +10,8 @@ class Ball:
         self.window_width = WIDTH
         self.window_height = HEIGHT
 
+        self.my_sector = None
+
         # Startwert und aktuelle Position
         self.x = self.original_x = random.randint(0 + radius, self.window_width - radius)
         self.y = self.original_y = random.randint(0 + radius, self.window_height - radius)
@@ -25,7 +27,9 @@ class Ball:
         self.vel_vec = np.array([self.x_vel, self.y_vel])
 
         self.radius = radius
+
         self.masse = masse
+        self.acceleration = np.array([0, 0])
         self.color = color
         self.last_collision = None  # Teilchen mit dem self als letztes kollidiert ist
 

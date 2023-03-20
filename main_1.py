@@ -14,7 +14,7 @@ WIDTH, HEIGHT = 700, 400
 WIN = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Brownsche Bewegung")
 
-DO_VELOCITY_PLOT = False
+DO_VELOCITY_PLOT = True
 
 # Farbwerte
 RED = (255, 82, 32)
@@ -26,6 +26,7 @@ YELLOW = (255, 255, 0)
 
 # Tick-Faktor
 TIME_STEP = 3
+# REPULSE = 0.1
 
 # Setup Teilchen
 BALL_RADIUS = 2
@@ -62,7 +63,7 @@ def generate_balls(amount):
     return balls
 
 
-def generate_sectors():
+def generate_sectors(amount_sqr):
     sector_list = []
     sector_1 = Sector.Sector(np.array([0-100, 0-100]), np.array([WIDTH/2, HEIGHT/2]))
     sector_2 = Sector.Sector(np.array([WIDTH/2, 0-100]), np.array([WIDTH+100, HEIGHT/2]))
@@ -73,15 +74,24 @@ def generate_sectors():
     sector_list.append(sector_3)
     sector_list.append(sector_4)
 
-    return sector_list
+    '''for i in range(amount_sqr):
+        for j in range(amount_sqr):
+            if i == 0 and j == 0:
+                sector = Sector.Sector(np.array([0, 0]), np.array([HEIGHT * (j+1)/amount_sqr, WIDTH * (j+1)/amount_sqr]))
+                sector_list.append(sector)
+            else:
+                sector = Sector.Sector(np.array([HEIGHT * (i+1)/amount_sqr, WIDTH * (i+1)/amount_sqr]), np.array([HEIGHT * (j+1)/amount_sqr, WIDTH * (j+1)/amount_sqr]))
+                sector_list.append(sector)
+    '''
 
+    return sector_list
 
 def main():
     run = 1
     # generiert das brownsche Teilchen als ersten Eintrag einer Liste aller Teilchen
     brownsches_teilchen = Ball.Ball(BROWNSCHESTEILCHEN_RADIUS, BROWNSCHESTEILCHEN_COLOR, BROWNSCHESTEILCHEN_MASSE, WIDTH, HEIGHT, TIME_STEP)
     balls = [brownsches_teilchen] + generate_balls(BALL_AMOUNT)
-    sectors = generate_sectors()
+    sectors = generate_sectors(2)
     vel_dict = {}
 
     while run:
@@ -108,6 +118,15 @@ def main():
                         vel_dict[abselv] += 1
                     else:
                         vel_dict[abselv] = 1
+
+        #for ball in balls:
+        #    ''' Bewegung und Kollision aller Teilchen'''
+        #    ball.handle_border_collision()
+        #    for i in range(balls.index(ball) + 1, len(balls)):
+        #        ball.handle_collision(balls[i])
+        #        # ball.repulse(balls[i])
+        #    ball.move()
+        
 
     if DO_VELOCITY_PLOT:
         '''falls True, wird nach Simulationsende die Geschwindigkeitsverteilung geplottet'''
