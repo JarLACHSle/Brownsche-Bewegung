@@ -16,11 +16,11 @@ vanishes = 0
 
 # Tick-Faktor
 TIME_STEP = 1
-num_steps = 500
+num_steps = 100
 
 # Setup Teilchen
 BALL_RADIUS = 0.5 
-BALL_AMOUNT = 500
+BALL_AMOUNT = 100
 BALL_COLOR = "blue"
 BALL_MASSE = 0.5
 
