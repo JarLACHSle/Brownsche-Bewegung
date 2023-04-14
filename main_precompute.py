@@ -26,7 +26,7 @@ num_steps = 500
 
 # Setup Teilchen
 BALL_RADIUS = 0.5
-BALL_AMOUNT = 600
+BALL_AMOUNT = 500
 BALL_COLOR = "blue"
 BALL_MASSE = 0.5
 
@@ -183,7 +183,7 @@ plane_graph = ax2.scatter(xlist, ylist, s=sizes2, c=colors)
 ani1 = matplotlib.animation.FuncAnimation(fig1, update_graph1, num_steps, interval=50, blit=False)
 ani2 = matplotlib.animation.FuncAnimation(fig2, update_graph2, num_steps, interval=50, blit=False)
 
-ani1.save('Brownsche_Bewegung_Render_3D.mp4', fps=30)
+#ani1.save('Brownsche_Bewegung_Render_3D.mp4', fps=30)
 ani2.save('Brownsche_Bewegung_Render_XY.mp4', fps=30)
 print("saved!")
 
